@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Confirmar Exclusão de Avaliação</title>
+</head>
+<body>
+    <h1>Confirmar Exclusão de Avaliação</h1>
+    <p>Tem certeza que deseja excluir a avaliação do usuário {{ object.userId }} para o filme {{ object.movieId }}?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Confirmar</button>
+    </form>
+    <a href="{% url 'rating_list' %}">Cancelar</a>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de Avaliações</title>
+</head>
+<body>
+    <h1>Lista de Avaliações</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID do Usuário</th>
+                <th>ID do Filme</th>
+                <th>Avaliação</th>
+                <th>Timestamp</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rating in ratings %}
+            <tr>
+                <td>{{ rating.userId }}</td>
+                <td>{{ rating.movieId }}</td>
+                <td>{{ rating.rating }}</td>
+                <td>{{ rating.timestamp }}</td>
+                <td>
+                    <a href="{% url 'rating_update' rating.pk %}">Editar</a>
+                    <a href="{% url 'rating_delete' rating.pk %}">Deletar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'rating_create' %}">Adicionar Nova Avaliação</a>
+</body>
+</html>

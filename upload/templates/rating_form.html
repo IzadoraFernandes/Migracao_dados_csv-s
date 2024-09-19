@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Formulário de Avaliação</title>
+</head>
+<body>
+    <h1>Formulário de Avaliação</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Salvar</button>
+    </form>
+    <a href="{% url 'rating_list' %}">Cancelar</a>
+</body>
+</html>

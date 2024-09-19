@@ -1,66 +1,163 @@
-import pandas as pd
-from sqlalchemy import create_engine
-from django.shortcuts import render
+import csv
+from django.shortcuts import render, redirect
+from .forms import *
+from .models import Rating, Tag, Movie, Link, GenomeScore, GenomeTag
+from django.db import transaction
 from django.http import HttpResponse
-import logging
-import io
-from upload.models import *
-from django.db.models import Q
-import time
 
+"""def upload_csv(request):
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-DATABASE_URI = 'postgresql://postgres:pgadmin@localhost:5432/migration_data'
-engine = create_engine(DATABASE_URI)
-
-def load_csv_to_db(file, table_name, chunksize=100000):
-    try:
-        # Verifica se a tabela existe no banco de dados
-        if not engine.dialect.has_table(engine, table_name):
-            logger.error(f"Tabela {table_name} não encontrada no banco de dados.")
-            return
-
-        # Ler o arquivo CSV em pedaços (chunks)
-        for chunk in pd.read_csv(io.StringIO(file.read().decode('utf-8')), chunksize=chunksize):
-            # Verifica se a coluna "timestamp" existe e converte para datetime e depois para bigint
-            if 'timestamp' in chunk.columns:
-                chunk['timestamp'] = pd.to_datetime(chunk['timestamp'], unit='s', errors='coerce')
-                chunk['timestamp_bigint'] = chunk['timestamp'].apply(lambda x: int(time.mktime(x.timetuple())) if pd.notna(x) else None)
-
-            # Insere o chunk no banco de dados
-            chunk.to_sql(table_name, engine, if_exists='append', index=False)
-            logger.info(f"Chunk inserido na tabela {table_name}")
-    except Exception as e:
-        logger.error(f"Erro ao inserir dados na tabela {table_name}: {e}")
-
-def upload_file(request):
     if request.method == 'POST':
-        file = request.FILES.get('file')
-        table_name = request.POST.get('table_name')
+        form = CSVUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = request.FILES['file']
+            dataset = file.read().decode('utf-8').splitlines()
+            reader = csv.reader(dataset)
 
-        if file and table_name:
-            try:
-                load_csv_to_db(file, table_name)
-                return HttpResponse(f'Arquivo {file.name} carregado com sucesso na tabela {table_name}!')
-            except Exception as e:
-                logger.error(f"Erro ao processar o arquivo {file.name}: {e}")
-                return HttpResponse(f"Erro ao carregar o arquivo {file.name}.")
-        else:
-            return HttpResponse("Por favor, envie um arquivo e forneça o nome da tabela.")
+            
+            model_name = request.POST.get('model')
+            model = None
 
-    return render(request, 'upload_form.html')
+            if model_name == 'Rating':
+                model = Rating
+            elif model_name == 'Tag':
+                model = Tag
+            elif model_name == 'Movie':
+                model = Movie
+            elif model_name == 'Link':
+                model = Link
+            elif model_name == 'GenomeScore':
+                model = GenomeScore
+            elif model_name == 'GenomeTag':
+                model = GenomeTag
 
-def search(request):
-    query = request.GET.get('q')
-    results = []
+            if model:
+                
+                headers = next(reader)
 
-    if query:
-        results = Movie.objects.filter(
-            Q(title__icontains=query) |
-            Q(genres__name__icontains=query) |
-            Q(tags__name__icontains=query)
-        ).distinct()
+                for row in reader:
+                    data = dict(zip(headers, row))
+                    # Cria uma nova instância do modelo com os dados do CSV
+                    obj = model(**data)
+                    obj.save()
 
-    return render(request, 'search_results.html', {'results': results, 'query': query})
+            return redirect('success')
+
+    else:
+        form = CSVUploadForm()
+
+    return render(request, 'upload_csv.html', {'form': form})
+"""
+def upload_csv(request):
+    if request.method == 'POST':
+        form = CSVUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = request.FILES['file']
+            dataset = file.read().decode('utf-8').splitlines()
+            reader = csv.reader(dataset)
+
+            model_name = request.POST.get('model')
+            model = None
+
+            # Mapeia o nome do modelo para a classe
+            if model_name == 'Rating':
+                model = Rating
+            elif model_name == 'Tag':
+                model = Tag
+            elif model_name == 'Movie':
+                model = Movie
+            elif model_name == 'Link':
+                model = Link
+            elif model_name == 'GenomeScore':
+                model = GenomeScore
+            elif model_name == 'GenomeTag':
+                model = GenomeTag
+
+            if model:
+                headers = next(reader)  # Lê os cabeçalhos
+                data_batch = []
+
+                for row in reader:
+                    data = dict(zip(headers, row))
+                    data_batch.append(model(**data))  # Acumula as instâncias
+
+                # Salva em lotes
+                batch_size = 500000
+                for i in range(0, len(data_batch), batch_size):
+                    with transaction.atomic():
+                        model.objects.bulk_create(data_batch[i:i + batch_size])
+
+            return redirect('success')
+
+    else:
+        form = CSVUploadForm()
+
+    return render(request, 'upload_csv.html', {'form': form})
+
+def upload_success(request):
+    return render(request, 'success.html')
+
+
+def rating_list(request):
+    ratings = Rating.objects.all()
+    return render(request, 'rating_list.html', {'ratings': ratings})
+
+def rating_create(request):
+    if request.method == 'POST':
+        form = RatingForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('rating_list')
+    else:
+        form = RatingForm()
+    return render(request, 'rating_form.html', {'form': form})
+
+def rating_update(request, pk):
+    rating = Rating.objects.get(pk=pk)
+    if request.method == 'POST':
+        form = RatingForm(request.POST, instance=rating)
+        if form.is_valid():
+            form.save()
+            return redirect('rating_list')
+    else:
+        form = RatingForm(instance=rating)
+    return render(request, 'rating_form.html', {'form': form})
+
+def rating_delete(request, pk):
+    rating = Rating.objects.get(pk=pk)
+    if request.method == 'POST':
+        rating.delete()
+        return redirect('rating_list')
+    return render(request, 'rating_confirm_delete.html', {'object': rating})
+
+def tag_list(request):
+    tags = Tag.objects.all()
+    return render(request, 'tag_list.html', {'tags': tags})
+
+def tag_create(request):
+    if request.method == 'POST':
+        form = TagForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('tag_list')
+    else:
+        form = TagForm()
+    return render(request, 'tag_form.html', {'form': form})
+
+def tag_update(request, pk):
+    tag = Tag.objects.get(pk=pk)
+    if request.method == 'POST':
+        form = TagForm(request.POST, instance=tag)
+        if form.is_valid():
+            form.save()
+            return redirect('tag_list')
+    else:
+        form = TagForm(instance=tag)
+    return render(request, 'tag_form.html', {'form': form})
+
+def tag_delete(request, pk):
+    tag = Tag.objects.get(pk=pk)
+    if request.method == 'POST':
+        tag.delete()
+        return redirect('tag_list')
+    return render(request, 'tag_confirm_delete.html', {'object': tag})

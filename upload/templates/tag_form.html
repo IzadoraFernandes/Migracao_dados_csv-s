@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Formulário de Tag</title>
+</head>
+<body>
+    <h1>Formulário de Tag</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Salvar</button>
+    </form>
+    <a href="{% url 'tag_list' %}">Cancelar</a>
+</body>
+</html>
+

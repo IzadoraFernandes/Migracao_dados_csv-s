@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Confirmar Exclusão de Tag</title>
+</head>
+<body>
+    <h1>Confirmar Exclusão de Tag</h1>
+    <p>Tem certeza que deseja excluir a tag "{{ object.tag }}" do usuário {{ object.userId }} para o filme {{ object.movieId }}?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Confirmar</button>
+    </form>
+    <a href="{% url 'tag_list' %}">Cancelar</a>
+</body>
+</html>

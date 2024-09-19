@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de Tags</title>
+</head>
+<body>
+    <h1>Lista de Tags</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID do Usuário</th>
+                <th>ID do Filme</th>
+                <th>Tag</th>
+                <th>Timestamp</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tag in tags %}
+            <tr>
+                <td>{{ tag.userId }}</td>
+                <td>{{ tag.movieId }}</td>
+                <td>{{ tag.tag }}</td>
+                <td>{{ tag.timestamp }}</td>
+                <td>
+                    <a href="{% url 'tag_update' tag.pk %}">Editar</a>
+                    <a href="{% url 'tag_delete' tag.pk %}">Deletar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'tag_create' %}">Adicionar Nova Tag</a>
+</body>
+</html>

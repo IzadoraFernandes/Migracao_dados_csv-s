@@ -1,55 +1,62 @@
 from django.db import models
+from django.utils import timezone
+
+class Rating(models.Model):
+    userId = models.IntegerField()
+    movieId = models.IntegerField()
+    rating = models.FloatField()
+    timestamp = models.BigIntegerField()
+
+    def __str__(self):
+        return f'Usuário {self.userId} avaliou Filme {self.movieId} com {self.rating}'
+
+class Tag(models.Model):
+    userId = models.IntegerField()
+    movieId = models.IntegerField()
+    tag = models.CharField(max_length=255)
+    timestamp = models.BigIntegerField()
+
+    def __str__(self):
+        return f'Usuário {self.userId} etiquetou Filme {self.movieId} com {self.tag}'
 
 class Movie(models.Model):
-    movie_id = models.IntegerField(primary_key=True)
+    movieId = models.IntegerField()
     title = models.CharField(max_length=255)
-    year = models.IntegerField(null=True, blank=True) 
+    genres = models.CharField(max_length=255)
 
     def __str__(self):
         return self.title
 
-
-class Genre(models.Model):
-    name = models.CharField(max_length=100)
-    movies = models.ManyToManyField(Movie, related_name='genres')
-
-    def __str__(self):
-        return self.name
-
-
-class Tag(models.Model):
-    name = models.CharField(max_length=100)
+class Link(models.Model):
+    movieId = models.OneToOneField(Movie, on_delete=models.CASCADE, primary_key=True)
+    imdbId = models.CharField(max_length=255, default='default_imdb_id')  
+    tmdbId = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return f'{self.movieId.title} (IMDb: {self.imdbId}, TMDb: {self.tmdbId})'
 
-
-class MovieTag(models.Model):
-    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+class GenomeScore(models.Model):
+    movieId = models.IntegerField()
+    tagId = models.IntegerField()
     relevance = models.FloatField()
 
-    class Meta:
-        unique_together = ('movie', 'tag')
+    def __str__(self):
+        return f'Filme {self.movieId} - Etiqueta {self.tagId}: {self.relevance}'
 
-
-class Rating(models.Model):
-    user_id = models.IntegerField()
-    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
-    rating = models.FloatField()
-    timestamp = models.DateTimeField()
-
-    class Meta:
-        unique_together = ('user_id', 'movie')
+class GenomeTag(models.Model):
+    tagId = models.IntegerField()
+    tag = models.CharField(max_length=255)
 
     def __str__(self):
-        return f'{self.movie.title} - {self.rating}'
+        return self.tag
 
-
-class Link(models.Model):
-    movie = models.OneToOneField(Movie, on_delete=models.CASCADE)
-    imdb_id = models.CharField(max_length=10, null=True, blank=True)
-    tmdb_id = models.CharField(max_length=10, null=True, blank=True)
+class FileUpload(models.Model):
+    file_name = models.CharField(max_length=255)
+    upload_date = models.DateTimeField(default=timezone.now)
+    processing_time = models.DurationField(null=True, blank=True)
+    records_inserted = models.IntegerField(default=0)
+    records_failed = models.IntegerField(default=0)
+    task_id = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
-        return f'{self.movie.title} - IMDb: {self.imdb_id}, TMDb: {self.tmdb_id}'
+        return self.file_name

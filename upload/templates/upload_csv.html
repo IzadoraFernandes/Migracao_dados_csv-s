@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload CSV</title>
+</head>
+<body>
+    <h1>Upload CSV</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <label for="model">Selecionar Modelo:</label>
+        <select name="model" id="model">
+            <option value="Rating">Rating</option>
+            <option value="Tag">Tag</option>
+            <option value="Movie">Movie</option>
+            <option value="Link">Link</option>
+            <option value="GenomeScore">GenomeScore</option>
+            <option value="GenomeTag">GenomeTag</option>
+        </select>
+        <button type="submit">Upload</button>
+    </form>
+</body>
+</html>
