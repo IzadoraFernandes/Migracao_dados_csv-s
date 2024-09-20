@@ -5,7 +5,7 @@ Repositório criado para desenvolvimento de projeto para leitura e escrita de ar
 Django;
 Html;
 Css;
-Buutstrap;
+Bootstrap;
 
 ## Instalação e execução do projeto:
 
