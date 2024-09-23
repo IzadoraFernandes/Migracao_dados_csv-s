@@ -7,8 +7,6 @@ Html;
 Css;
 Bootstrap;
 
-Máterial do YouTube: https://www.youtube.com/watch?v=VXMJHcO5Zvs&t=1898s 
-
 
 ## Instalação e execução do projeto:
 
@@ -20,8 +18,6 @@ Source env/bin/activate
 pip install -r requirements.txt 
 
 ### Rodando o projeto:
-
-
 python manage.py runserver 
 
 ### Acessar a URL e adicionar os arquivos:
@@ -44,6 +40,9 @@ http://127.0.0.1:8000/upload/genometag/
 
 #### GenomeScore:
 http://127.0.0.1:8000/upload/genomescore/
+
+#### Pesquisa: 
+http://127.0.0.1:8000/upload/search/
 
 ## Estrutura do DB: 
 
