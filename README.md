@@ -47,7 +47,6 @@ http://127.0.0.1:8000/upload/search/
 ## Estrutura do DB: 
 
 
-![jeferson_cvs](https://github.com/user-attachments/assets/dae99317-edfd-4d8c-954b-2e3cf0e8dc96)
 
-
+![projetopadb](https://github.com/user-attachments/assets/bcf914b3-8964-432e-8c37-33a171cbd677)
 
